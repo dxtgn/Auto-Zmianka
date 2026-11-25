@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "id": "autozmianka",
+  "version": "${version}",
+  "name": "Auto-Zmianka",
+  "description": "Klientowy pomocnik do sterowania losowaniem w GUI zmianki.",
+  "authors": ["Auto-Zmianka"],
+  "license": "MIT",
+  "environment": "client",
+  "entrypoints": { "client": ["pl.autozmianka.AutoZmiankaClient"] },
+  "depends": {
+    "fabricloader": ">=0.16.0",
+    "minecraft": "~1.21.6",
+    "java": ">=21",
+    "fabric-api": "*"
+  }
+}
