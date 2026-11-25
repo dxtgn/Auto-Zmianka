@@ -55,7 +55,10 @@ public class AutoZmiankaScreen extends Screen {
 
     @Override
     public void render(DrawContext context, int mouseX, int mouseY, float delta) {
-        renderBackground(context, mouseX, mouseY, delta);
+        // W 1.21.6 renderBackground może uruchamiać blur, który
+        // nie może zostać wykonany drugi raz w tej samej klatce.
+        // Rysujemy przyciemnione tło bez efektu blur.
+        context.fill(0, 0, width, height, 0xC0101010);
         super.render(context, mouseX, mouseY, delta);
         context.drawCenteredTextWithShadow(textRenderer, title, width / 2, height / 2 - 116, 0xFFFFFF);
         context.drawCenteredTextWithShadow(textRenderer,
