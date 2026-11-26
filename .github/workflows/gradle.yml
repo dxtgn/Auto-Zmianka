@@ -1,27 +1,63 @@
-name: Build mod
+name: Build Auto-Zmianka 2.4.1
 
 on:
   push:
+    branches:
+      - "**"
+  pull_request:
+    branches:
+      - "**"
   workflow_dispatch:
+
+permissions:
+  contents: read
 
 jobs:
   build:
+    name: Build Minecraft 1.21.6 mod
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-java@v4
+      - name: Pobierz kod repozytorium
+        uses: actions/checkout@v4
+
+      - name: Ustaw Java 21
+        uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: 21
-      - uses: gradle/actions/setup-gradle@v4
+          java-version: "21"
+
+      - name: Ustaw Gradle 8.12
+        uses: gradle/actions/setup-gradle@v4
         with:
-          gradle-version: 8.12
-      - name: Build
+          gradle-version: "8.12"
+
+      - name: Znajdź projekt Auto-Zmianka
+        shell: bash
         run: |
-          DIR=$(dirname "$(find . -name settings.gradle | head -n 1)")
-          cd "$DIR"
-          gradle build --no-daemon
-      - uses: actions/upload-artifact@v4
+          if [ -f "build.gradle" ]; then
+            PROJECT_DIR="."
+          else
+            BUILD_FILE="$(find . -name build.gradle -not -path '*/.gradle/*' -not -path '*/build/*' -print -quit)"
+            if [ -z "$BUILD_FILE" ]; then
+              echo "Nie znaleziono pliku build.gradle. Wgraj do repozytorium rozpakowany projekt Auto-Zmianka."
+              exit 1
+            fi
+            PROJECT_DIR="$(dirname "$BUILD_FILE")"
+          fi
+          echo "PROJECT_DIR=$PROJECT_DIR" >> "$GITHUB_ENV"
+          echo "Projekt do zbudowania: $PROJECT_DIR"
+
+      - name: Zbuduj moda
+        run: gradle build --no-daemon
+        working-directory: ${{ env.PROJECT_DIR }}
+
+      - name: Udostępnij plik JAR
+        uses: actions/upload-artifact@v4
         with:
-          name: autozmianka-jar
-          path: "**/build/libs/autozmianka-1.1.0.jar"
+          name: Auto-Zmianka-2.4.1-Minecraft-1.21.6
+          path: |
+            ${{ env.PROJECT_DIR }}/build/libs/*.jar
+            !${{ env.PROJECT_DIR }}/build/libs/*-sources.jar
+          if-no-files-found: error
+          retention-days: 14
